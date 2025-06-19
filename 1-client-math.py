@@ -9,9 +9,10 @@ from langchain_core.messages.ai import AIMessage
 import asyncio
 
 model = ChatOllama(model="qwen3:8b")
+
+# The custom 1-server-math.py Python MCP server
 server_params = StdioServerParameters(
     command="uv",
-    # Make sure to update to the full absolute path to your math_server.py file
     args=["run", "1-server-math.py"],
 )
 message = "what's (3 + 5) x 12?"
@@ -25,7 +26,7 @@ async def run_agent(message: str):
             # Get tools
             tools = await load_mcp_tools(session)
 
-            # List tools
+            # Print tools
             for index, tool in enumerate(tools):
                 print(f"Tool {index} name: {tool.name}, description: {tool.description}")           
 

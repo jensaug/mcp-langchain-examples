@@ -10,9 +10,9 @@ import asyncio
 
 model = ChatOllama(model="qwen3:8b")
 
+# The provided mcp-server-git Python MCP server
 server_params = StdioServerParameters(
     command="uvx",
-    # Make sure to update to the full absolute path to your math_server.py file
     args=["mcp-server-git"]
 )
 message = "Which commit is the latest in the repository?"
@@ -25,8 +25,10 @@ async def run_agent(message: str):
 
             # Get tools
             tools = await load_mcp_tools(session)
-            for tool in tools:
-                print(f"Tool name: {tool.name}")
+
+            # Print tools
+            for index, tool in enumerate(tools):
+                print(f"Tool {index} name: {tool.name}, description: {tool.description}")          
 
             # Create and run the agent
             agent = create_react_agent(model, tools)
