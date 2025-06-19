@@ -10,11 +10,15 @@ import asyncio
 
 model = ChatOllama(model="qwen3:8b")
 
+# The provided server-filesystem Node MCP server
 server_params = StdioServerParameters(
-    command="uvx",
-    args=["ddg-mcp-server"]
+    command="npx",
+    args=["-y", "@modelcontextprotocol/server-filesystem", "."]
 )
-message = "Find the best restaurant in San Francisco"
+#message = "Show the directory structure but ignore the .venv folder"
+#message = "List all files in the current folder which are not hidden"
+#message = "Append a line to a file named filesystem.txt in the current folder with following text and correct linenumer: This is line [linenumer]"
+message = "Show file info for pyproject.toml"
 
 async def run_agent(message: str):
     async with stdio_client(server_params) as (read, write):
@@ -24,8 +28,10 @@ async def run_agent(message: str):
 
             # Get tools
             tools = await load_mcp_tools(session)
-            for tool in tools:
-                print(f"Tool name: {tool.name}")
+
+            # Print tools
+            for index, tool in enumerate(tools):
+                print(f"Tool {index} name: {tool.name}, description: {tool.description}")    
 
             # Create and run the agent
             agent = create_react_agent(model, tools)
