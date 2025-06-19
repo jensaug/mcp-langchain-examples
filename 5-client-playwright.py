@@ -10,15 +10,16 @@ import asyncio
 
 model = ChatOllama(model="qwen3:8b")
 
+# The provided Playwright headless browser Node MCP server
 server_params = StdioServerParameters(
     command="npx",
-    # Make sure to update to the full absolute path to your math_server.py file
-    args=["@playwright/mcp@latest", "--headless"],
-    env={"DISPLAY": ":1",
-         }
+    args=["@playwright/mcp@latest", "--headless", "--browser=chromium"],
+    env={"DISPLAY": ":1"}
 )
 
-async def run_agent():
+message = "Open a Chromium browser navigate to Skatteverket. Summarize the content in plain text."
+
+async def run_agent(message: str):
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             # Initialize the connection
@@ -26,17 +27,19 @@ async def run_agent():
 
             # Get tools
             tools = await load_mcp_tools(session)
-            for tool in tools:
-                print(f"Tool name: {tool.name}")
+
+            # Print tools
+            for index, tool in enumerate(tools):
+                print(f"Tool {index} name: {tool.name}, description: {tool.description}")   
 
             # Create and run the agent
             agent = create_react_agent(model, tools)
-            agent_response = await agent.ainvoke({"messages": "Using google.com, find the best restaurant in San Francisco"})
+            agent_response = await agent.ainvoke({"messages": message})
             return agent_response
 
 # Run the async function
 if __name__ == "__main__":
-    result = asyncio.run(run_agent())
+    result = asyncio.run(run_agent(message))
     for message in result['messages']:
         if isinstance(message, AIMessage):
             print(message.content)
